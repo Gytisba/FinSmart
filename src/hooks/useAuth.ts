@@ -74,6 +74,7 @@ export const useAuth = () => {
           } else {
             setProfile(newProfile);
           }
+        }
         console.error('Error fetching profile:', error);
       } else {
         setProfile(data);
