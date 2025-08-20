@@ -57,32 +57,23 @@ export const useAuth = () => {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          // Profile doesn't exist, create it
-          console.log('Creating profile for user:', userId);
-          const { data: newProfile, error: createError } = await supabase
-            .from('user_profiles')
-            .insert({
-              id: userId,
-              email: user?.email || '',
-              full_name: user?.user_metadata?.full_name || null
-            })
-            .select()
-            .single();
-          
-          if (createError) {
-            console.error('Error creating profile:', createError);
-          } else {
-            setProfile(newProfile);
-          }
+          // Profile doesn't exist, wait a moment and try again (for new users)
+          setTimeout(() => fetchProfile(userId), 1000);
+          return;
         }
         console.error('Error fetching profile:', error);
       } else {
         setProfile(data);
       }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -92,6 +83,10 @@ export const useAuth = () => {
         },
       },
     });
+
+    if (error) {
+      setLoading(false);
+    }
 
     return { data, error };
   };

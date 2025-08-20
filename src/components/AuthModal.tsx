@@ -38,13 +38,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           } else {
             setError(error.message);
           }
-          setLoading(false);
         } else {
           setSuccess('Sėkmingai prisijungėte!');
           setTimeout(() => {
             onClose();
             resetForm();
-            setLoading(false);
           }, 1000);
         }
       } else {
@@ -57,7 +55,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           } else {
             setError(error.message);
           }
-          setLoading(false);
         } else {
           setSuccess('Registracija sėkminga! Galite prisijungti.');
           setTimeout(() => {
@@ -66,15 +63,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             setEmail('');
             setPassword('');
             setFullName('');
-            setLoading(false);
           }, 3000);
         }
       }
     } catch (err) {
       setError('Įvyko nenumatyta klaida');
-      setLoading(false);
     } finally {
-      // Remove this finally block since we're handling loading state explicitly above
+      setLoading(false);
     }
   };
 
