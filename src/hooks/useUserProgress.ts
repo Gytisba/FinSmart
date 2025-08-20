@@ -41,9 +41,26 @@ export const useUserProgress = () => {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          // Progress doesn't exist, wait a moment and try again (for new users)
-          setTimeout(() => fetchProgress(), 1000);
-          return;
+          // Progress doesn't exist, create it
+          console.log('Creating initial progress for user:', user.id);
+          const { data: newProgress, error: createError } = await supabase
+            .from('user_progress')
+            .insert({
+              user_id: user.id,
+              level: 'beginner',
+              completed_modules: [],
+              badges: [],
+              total_points: 0,
+              current_streak: 0
+            })
+            .select()
+            .single();
+          
+          if (createError) {
+            console.error('Error creating progress:', createError);
+          } else {
+            setProgress(newProgress);
+          }
         }
         console.error('Error fetching progress:', error);
       } else {
