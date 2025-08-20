@@ -58,7 +58,10 @@ function App() {
 
   const handleResetProgress = async () => {
     if (user && progress) {
-      await resetProgress();
+      const confirmed = window.confirm('Ar tikrai norite ištrinti visą savo pažangą? Šis veiksmas yra negrįžtamas.');
+      if (confirmed) {
+        await resetProgress();
+      }
     }
   };
 

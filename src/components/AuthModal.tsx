@@ -33,7 +33,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (mode === 'login') {
         const { error } = await signIn(email, password);
         if (error) {
-          setError(error.message);
+          if (error.message.includes('Invalid login credentials')) {
+            setError('Neteisingas el. paštas arba slaptažodis');
+          } else {
+            setError(error.message);
+          }
         } else {
           setSuccess('Sėkmingai prisijungėte!');
           setTimeout(() => {
@@ -44,12 +48,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       } else {
         const { error } = await signUp(email, password, fullName);
         if (error) {
-          setError(error.message);
+          if (error.message.includes('User already registered')) {
+            setError('Vartotojas su šiuo el. paštu jau registruotas');
+          } else if (error.message.includes('Password should be at least 6 characters')) {
+            setError('Slaptažodis turi būti bent 6 simbolių ilgio');
+          } else {
+            setError(error.message);
+          }
         } else {
-          setSuccess('Registracija sėkminga! Patikrinkite el. paštą patvirtinimo nuorodai.');
+          setSuccess('Registracija sėkminga! Galite prisijungti.');
           setTimeout(() => {
             setMode('login');
             setSuccess(null);
+            setEmail('');
+            setPassword('');
+            setFullName('');
           }, 3000);
         }
       }

@@ -32,6 +32,7 @@ export const useUserProgress = () => {
     if (!user) return;
 
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('user_progress')
         .select('*')
@@ -39,6 +40,11 @@ export const useUserProgress = () => {
         .single();
 
       if (error) {
+        if (error.code === 'PGRST116') {
+          // Progress doesn't exist, wait a moment and try again (for new users)
+          setTimeout(() => fetchProgress(), 1000);
+          return;
+        }
         console.error('Error fetching progress:', error);
       } else {
         setProgress(data);
@@ -99,6 +105,8 @@ export const useUserProgress = () => {
   };
 
   const resetProgress = async () => {
+    if (!user) return { error: new Error('No user logged in') };
+
     return await updateProgress({
       level: 'beginner',
       completed_modules: [],

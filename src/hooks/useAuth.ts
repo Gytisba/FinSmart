@@ -48,6 +48,7 @@ export const useAuth = () => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -55,6 +56,11 @@ export const useAuth = () => {
         .single();
 
       if (error) {
+        if (error.code === 'PGRST116') {
+          // Profile doesn't exist, wait a moment and try again (for new users)
+          setTimeout(() => fetchProfile(userId), 1000);
+          return;
+        }
         console.error('Error fetching profile:', error);
       } else {
         setProfile(data);
@@ -67,6 +73,7 @@ export const useAuth = () => {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -77,20 +84,36 @@ export const useAuth = () => {
       },
     });
 
+    if (error) {
+      setLoading(false);
+    }
+
     return { data, error };
   };
 
   const signIn = async (email: string, password: string) => {
+    setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
+    if (error) {
+      setLoading(false);
+    }
+
     return { data, error };
   };
 
   const signOut = async () => {
+    setLoading(true);
     const { error } = await supabase.auth.signOut();
+    if (!error) {
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+    }
+    setLoading(false);
     return { error };
   };
 
