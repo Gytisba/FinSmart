@@ -1,6 +1,7 @@
 import React from 'react';
 import { BookOpen, TrendingUp, BarChart3, CheckCircle, Lock } from 'lucide-react';
 import { Level, UserProgress } from '../App';
+import { useCourses } from '../hooks/useCourses';
 
 interface LevelSelectionProps {
   onLevelSelect: (level: Level) => void;
@@ -8,19 +9,32 @@ interface LevelSelectionProps {
 }
 
 export const LevelSelection: React.FC<LevelSelectionProps> = ({ onLevelSelect, userProgress }) => {
+  const { courses, loading } = useCourses();
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Kraunami kursai...</p>
+        </div>
+      </div>
+    );
+  }
+
   const levels = [
     {
       id: 'beginner' as Level,
-      title: 'Pradedančiųjų lygis',
-      subtitle: 'Asmeninių finansų pagrindai',
+      title: courses.find(c => c.level === 'beginner')?.title || 'Pradedančiųjų lygis',
+      subtitle: courses.find(c => c.level === 'beginner')?.subtitle || 'Asmeninių finansų pagrindai',
       icon: BookOpen,
-      color: 'from-emerald-500 to-green-600',
-      description: 'Išmokite finansų pagrindų: biudžeto sudarymo, taupymo ir pagrindinių finansinių įrankių naudojimo.',
+      color: `from-${courses.find(c => c.level === 'beginner')?.color_from || 'emerald-500'} to-${courses.find(c => c.level === 'beginner')?.color_to || 'green-600'}`,
+      description: courses.find(c => c.level === 'beginner')?.description || 'Išmokite finansų pagrindų: biudžeto sudarymo, taupymo ir pagrindinių finansinių įrankių naudojimo.',
       modules: [
-        'Kas yra pinigai?',
-        'Biudžeto sudarymas',
-        'Taupymas vs išlaidavimas',
-        'Banko sąskaitos',
+        'Kas yra pinigai ir kaip jie veikia?',
+        'Biudžeto sudarymas - jūsų finansų pagrindas',
+        'Taupymas vs išlaidavimas - tinkamas balansas',
+        'Banko sąskaitos ir paslaugos',
         'Mokesčiai Lietuvoje'
       ],
       unlocked: true,
@@ -28,11 +42,11 @@ export const LevelSelection: React.FC<LevelSelectionProps> = ({ onLevelSelect, u
     },
     {
       id: 'intermediate' as Level,
-      title: 'Vidutinis lygis',
-      subtitle: 'Turto kūrimas ir finansiniai įrankiai',
+      title: courses.find(c => c.level === 'intermediate')?.title || 'Vidutinis lygis',
+      subtitle: courses.find(c => c.level === 'intermediate')?.subtitle || 'Turto kūrimas ir finansiniai įrankiai',
       icon: TrendingUp,
-      color: 'from-blue-500 to-indigo-600',
-      description: 'Sužinokite apie investavimą, pensijų kaupimą ir finansinių paslaugų naudojimą Lietuvoje.',
+      color: `from-${courses.find(c => c.level === 'intermediate')?.color_from || 'blue-500'} to-${courses.find(c => c.level === 'intermediate')?.color_to || 'indigo-600'}`,
+      description: courses.find(c => c.level === 'intermediate')?.description || 'Sužinokite apie investavimą, pensijų kaupimą ir finansinių paslaugų naudojimą Lietuvoje.',
       modules: [
         'Lietuvos pensijų sistema',
         'Sudėtinės palūkanos',
@@ -45,11 +59,11 @@ export const LevelSelection: React.FC<LevelSelectionProps> = ({ onLevelSelect, u
     },
     {
       id: 'advanced' as Level,
-      title: 'Pažengusiųjų lygis',
-      subtitle: 'Investavimas ir ekonomikos supratimas',
+      title: courses.find(c => c.level === 'advanced')?.title || 'Pažengusiųjų lygis',
+      subtitle: courses.find(c => c.level === 'advanced')?.subtitle || 'Investavimas ir ekonomikos supratimas',
       icon: BarChart3,
-      color: 'from-purple-500 to-pink-600',
-      description: 'Gilintis į akcijų rinkas, ETF fondus ir makroekonomikos principus.',
+      color: `from-${courses.find(c => c.level === 'advanced')?.color_from || 'purple-500'} to-${courses.find(c => c.level === 'advanced')?.color_to || 'pink-600'}`,
+      description: courses.find(c => c.level === 'advanced')?.description || 'Gilintis į akcijų rinkas, ETF fondus ir makroekonomikos principus.',
       modules: [
         'Akcijų rinkos pagrindai',
         'ETF fondai',

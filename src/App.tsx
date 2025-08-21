@@ -51,7 +51,7 @@ function App() {
 
   const handleQuizComplete = (moduleId: string, points: number) => {
     if (user && progress) {
-      completeModule(moduleId, points);
+      // Quiz completion is now handled in the Quiz component
     }
     setCurrentSection('home');
   };

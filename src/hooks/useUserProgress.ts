@@ -73,12 +73,43 @@ export const useUserProgress = () => {
     return { data, error };
   };
 
-  const completeModule = async (moduleId: string, points: number) => {
+  const completeLesson = async (lessonId: string) => {
+    if (!user) return { error: new Error('No user logged in') };
+
+    const { data, error } = await supabase
+      .from('user_lesson_progress')
+      .upsert({
+        user_id: user.id,
+        lesson_id: lessonId,
+        completed_at: new Date().toISOString(),
+      });
+
+    return { data, error };
+  };
+
+  const completeQuiz = async (courseId: string, score: number, totalQuestions: number, points: number) => {
     if (!progress) return { error: new Error('No progress found') };
 
+    // Record quiz attempt
+    const { error: quizError } = await supabase
+      .from('user_quiz_attempts')
+      .insert({
+        user_id: user!.id,
+        course_id: courseId,
+        score,
+        total_questions: totalQuestions,
+        points_earned: points,
+        completed_at: new Date().toISOString(),
+      });
+
+    if (quizError) {
+      return { error: quizError };
+    }
+
+    // Update user progress
     const newCompletedModules = [...progress.completed_modules];
-    if (!newCompletedModules.includes(moduleId)) {
-      newCompletedModules.push(moduleId);
+    if (!newCompletedModules.includes(courseId)) {
+      newCompletedModules.push(courseId);
     }
 
     const newTotalPoints = progress.total_points + points;
@@ -104,9 +135,35 @@ export const useUserProgress = () => {
     });
   };
 
+  const isLessonCompleted = async (lessonId: string): Promise<boolean> => {
+    if (!user) return false;
+
+    const { data, error } = await supabase
+      .from('user_lesson_progress')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('lesson_id', lessonId)
+      .single();
+
+    return !error && !!data;
+  };
+
   const resetProgress = async () => {
     if (!user) return { error: new Error('No user logged in') };
 
+    // Clear lesson progress
+    await supabase
+      .from('user_lesson_progress')
+      .delete()
+      .eq('user_id', user.id);
+
+    // Clear quiz attempts
+    await supabase
+      .from('user_quiz_attempts')
+      .delete()
+      .eq('user_id', user.id);
+
+    // Reset main progress
     return await updateProgress({
       level: 'beginner',
       completed_modules: [],
@@ -120,7 +177,9 @@ export const useUserProgress = () => {
     progress,
     loading,
     updateProgress,
-    completeModule,
+    completeLesson,
+    completeQuiz,
+    isLessonCompleted,
     resetProgress,
     refetch: fetchProgress,
   };

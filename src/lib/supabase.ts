@@ -70,6 +70,224 @@ export type Database = {
           updated_at?: string;
         };
       };
+      courses: {
+        Row: {
+          id: string;
+          level: 'beginner' | 'intermediate' | 'advanced';
+          title: string;
+          subtitle: string | null;
+          description: string | null;
+          color_from: string;
+          color_to: string;
+          icon: string;
+          total_modules: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          level: 'beginner' | 'intermediate' | 'advanced';
+          title: string;
+          subtitle?: string | null;
+          description?: string | null;
+          color_from?: string;
+          color_to?: string;
+          icon?: string;
+          total_modules?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          level?: 'beginner' | 'intermediate' | 'advanced';
+          title?: string;
+          subtitle?: string | null;
+          description?: string | null;
+          color_from?: string;
+          color_to?: string;
+          icon?: string;
+          total_modules?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      course_modules: {
+        Row: {
+          id: string;
+          course_id: string;
+          title: string;
+          description: string | null;
+          order_index: number;
+          duration_minutes: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          course_id: string;
+          title: string;
+          description?: string | null;
+          order_index: number;
+          duration_minutes?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          course_id?: string;
+          title?: string;
+          description?: string | null;
+          order_index?: number;
+          duration_minutes?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      course_lessons: {
+        Row: {
+          id: string;
+          module_id: string;
+          title: string;
+          content: string;
+          order_index: number;
+          duration_minutes: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          module_id: string;
+          title: string;
+          content: string;
+          order_index: number;
+          duration_minutes?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          module_id?: string;
+          title?: string;
+          content?: string;
+          order_index?: number;
+          duration_minutes?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      course_quiz_questions: {
+        Row: {
+          id: string;
+          course_id: string;
+          question: string;
+          explanation: string | null;
+          order_index: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          course_id: string;
+          question: string;
+          explanation?: string | null;
+          order_index: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          course_id?: string;
+          question?: string;
+          explanation?: string | null;
+          order_index?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      course_quiz_options: {
+        Row: {
+          id: string;
+          question_id: string;
+          option_text: string;
+          is_correct: boolean;
+          order_index: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          question_id: string;
+          option_text: string;
+          is_correct?: boolean;
+          order_index: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          question_id?: string;
+          option_text?: string;
+          is_correct?: boolean;
+          order_index?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      user_lesson_progress: {
+        Row: {
+          id: string;
+          user_id: string;
+          lesson_id: string;
+          completed_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          lesson_id: string;
+          completed_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          lesson_id?: string;
+          completed_at?: string;
+          created_at?: string;
+        };
+      };
+      user_quiz_attempts: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_id: string;
+          score: number;
+          total_questions: number;
+          points_earned: number;
+          completed_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          course_id: string;
+          score: number;
+          total_questions: number;
+          points_earned: number;
+          completed_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          course_id?: string;
+          score?: number;
+          total_questions?: number;
+          points_earned?: number;
+          completed_at?: string;
+          created_at?: string;
+        };
+      };
     };
   };
 };
