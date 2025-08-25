@@ -87,6 +87,8 @@ export const useCourses = () => {
   };
 
   const getCourseByLevel = (level: Level): Course | null => {
+    // Don't return null if still loading - let the component handle loading state
+    if (loading) return null;
     return courses.find(course => course.level === level) || null;
   };
 

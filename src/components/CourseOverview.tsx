@@ -17,25 +17,27 @@ export const CourseOverview: React.FC<CourseOverviewProps> = ({
   onBack
 }) => {
   const { getCourseByLevel, fetchCourseModules } = useCourses();
+  const { getCourseByLevel, fetchCourseModules, loading: coursesLoading } = useCourses();
   const [modules, setModules] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [modulesLoading, setModulesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Wait for courses to load before trying to load modules
   useEffect(() => {
-    loadCourseModules();
-  }, [level]);
+    if (!coursesLoading) {
+      loadCourseModules();
+    }
+  }, [level, coursesLoading]);
 
   const loadCourseModules = async () => {
-    setLoading(true);
+    setModulesLoading(true);
     setError(null);
     
     try {
       const course = getCourseByLevel(level);
-      console.log('Found course:', course);
       
       if (course) {
         const courseModules = await fetchCourseModules(course.id);
-        console.log('Found modules:', courseModules);
         setModules(courseModules);
         
         if (courseModules.length === 0) {
@@ -48,16 +50,17 @@ export const CourseOverview: React.FC<CourseOverviewProps> = ({
       console.error('Error loading course modules:', err);
       setError('Klaida kraunant kurso modulius');
     } finally {
-      setLoading(false);
+      setModulesLoading(false);
     }
   };
 
-  if (loading) {
+  // Show loading if either courses or modules are loading
+  if (coursesLoading || modulesLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Kraunami moduliai...</p>
+          <p className="text-gray-600">{coursesLoading ? 'Kraunami kursai...' : 'Kraunami moduliai...'}</p>
         </div>
       </div>
     );
