@@ -18,18 +18,27 @@ export const useUserProgress = () => {
   const { user } = useAuth();
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchProgress();
     } else {
       setProgress(null);
-      setLoading(false);
+      if (!hasInitiallyLoaded) {
+        setLoading(false);
+        setHasInitiallyLoaded(true);
+      }
     }
-  }, [user]);
+  }, [user, hasInitiallyLoaded]);
 
   const fetchProgress = async () => {
     if (!user) return;
+
+    // Only show loading on initial fetch
+    if (!hasInitiallyLoaded) {
+      setLoading(true);
+    }
 
     const MAX_RETRIES = 3;
     let retryCount = 0;
@@ -50,31 +59,41 @@ export const useUserProgress = () => {
               setTimeout(() => attemptFetch(), 1000 * retryCount);
               return;
             } else {
-              console.error('Progress not found after retries');
-              setLoading(false);
+              if (!hasInitiallyLoaded) {
+                setLoading(false);
+                setHasInitiallyLoaded(true);
+              }
               return;
             }
           } else {
-            console.error('Error fetching progress:', error);
-            setLoading(false);
+            if (!hasInitiallyLoaded) {
+              setLoading(false);
+              setHasInitiallyLoaded(true);
+            }
             return;
           }
         }
 
         setProgress(data);
-        setLoading(false);
+        if (!hasInitiallyLoaded) {
+          setLoading(false);
+          setHasInitiallyLoaded(true);
+        }
       } catch (error) {
-        console.error('Error fetching progress:', error);
-        setLoading(false);
+        if (!hasInitiallyLoaded) {
+          setLoading(false);
+          setHasInitiallyLoaded(true);
+        }
       }
     };
 
     try {
-      setLoading(true);
       await attemptFetch();
     } catch (error) {
-      console.error('Error fetching progress:', error);
-      setLoading(false);
+      if (!hasInitiallyLoaded) {
+        setLoading(false);
+        setHasInitiallyLoaded(true);
+      }
     }
   };
 

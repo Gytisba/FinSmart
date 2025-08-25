@@ -32,12 +32,20 @@ export interface UserProgress {
 
 function App() {
   const { user, loading: authLoading } = useAuth();
-  const { progress, loading: progressLoading, completeModule, resetProgress } = useUserProgress();
+  const { progress, loading: progressLoading, resetProgress } = useUserProgress();
   const [currentSection, setCurrentSection] = useState<Section>('home');
   const [selectedLevel, setSelectedLevel] = useState<Level>('beginner');
   const [selectedModule, setSelectedModule] = useState<string>('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
+  // Track when initial loading is complete
+  React.useEffect(() => {
+    if (!authLoading && !progressLoading && !initialLoadComplete) {
+      setInitialLoadComplete(true);
+    }
+  }, [authLoading, progressLoading, initialLoadComplete]);
 
   const handleLevelSelect = (level: Level) => {
     setSelectedLevel(level);
@@ -85,7 +93,8 @@ function App() {
     currentStreak: 0
   };
 
-  if (authLoading || progressLoading) {
+  // Only show loading screen on initial load, not when switching tabs
+  if (!initialLoadComplete && (authLoading || progressLoading)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">

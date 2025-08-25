@@ -15,25 +15,34 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
+  const [hasSeenInitialSession, setHasSeenInitialSession] = useState(false);
 
   useEffect(() => {
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.id);
-      
       // Handle initial session
       if (event === 'INITIAL_SESSION') {
-        setInitialized(true);
-      }
-      
-      // Only process if we've seen the initial session or this is a real auth change
-      if (!initialized && event !== 'INITIAL_SESSION') {
+        setHasSeenInitialSession(true);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          await fetchProfile(session.user.id);
+        } else {
+          setProfile(null);
+          setLoading(false);
+        }
         return;
       }
       
+      // Only process auth changes after we've seen the initial session
+      if (!hasSeenInitialSession) {
+        return;
+      }
+      
+      // Don't show loading for subsequent auth changes (like tab switching)
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -41,16 +50,14 @@ export const useAuth = () => {
         await fetchProfile(session.user.id);
       } else {
         setProfile(null);
-        setLoading(false);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [initialized]);
+  }, [hasSeenInitialSession]);
 
   const fetchProfile = async (userId: string) => {
     try {
-      console.log('Fetching profile for user:', userId);
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -58,18 +65,14 @@ export const useAuth = () => {
         .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
         // Don't fail if profile doesn't exist, just continue without it
         setProfile(null);
       } else {
-        console.log('Profile fetched successfully:', data);
         setProfile(data);
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
       setProfile(null);
     } finally {
-      console.log('Setting loading to false');
       setLoading(false);
     }
   };
