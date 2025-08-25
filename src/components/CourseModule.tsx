@@ -43,6 +43,7 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
         setModules(courseModules);
         
         if (courseModules.length > 0) {
+          const moduleLessons = await fetchModuleLessons(courseModules[0].id);
           setLessons(moduleLessons);
           if (moduleLessons.length === 0) {
             setError('Pamokos nerastos šiam moduliui');
@@ -50,9 +51,6 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
         } else {
           setError('Moduliai nerasti šiam kursui');
         }
-      } else {
-        setError('Kursas nerastas šiam lygiui');
-      }
       } else {
         setError('Kursas nerastas šiam lygiui');
       }
