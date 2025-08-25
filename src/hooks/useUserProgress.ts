@@ -123,6 +123,8 @@ export const useUserProgress = () => {
         user_id: user.id,
         lesson_id: lessonId,
         completed_at: new Date().toISOString(),
+      }, {
+        onConflict: 'user_id,lesson_id'
       });
 
     return { data, error };
