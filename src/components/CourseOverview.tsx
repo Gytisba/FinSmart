@@ -16,7 +16,6 @@ export const CourseOverview: React.FC<CourseOverviewProps> = ({
   onModuleSelect,
   onBack
 }) => {
-  const { getCourseByLevel, fetchCourseModules } = useCourses();
   const { getCourseByLevel, fetchCourseModules, loading: coursesLoading } = useCourses();
   const [modules, setModules] = useState<any[]>([]);
   const [modulesLoading, setModulesLoading] = useState(true);
