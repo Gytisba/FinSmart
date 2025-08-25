@@ -67,8 +67,7 @@ export const useCourses = () => {
       
       const { data, error } = await supabase
         .from('courses')
-        .select('*')
-        .order('created_at');
+        .select('*');
 
 
       if (error) {
