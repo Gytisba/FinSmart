@@ -6,6 +6,7 @@ import { useUserProgress } from '../hooks/useUserProgress';
 
 interface CourseModuleProps {
   level: Level;
+  moduleId: string;
   userProgress: UserProgress;
   onStartQuiz: () => void;
   onBack: () => void;
@@ -13,6 +14,7 @@ interface CourseModuleProps {
 
 export const CourseModule: React.FC<CourseModuleProps> = ({
   level,
+  moduleId,
   userProgress,
   onStartQuiz,
   onBack
@@ -34,25 +36,20 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
     setError(null);
     
     try {
-      const course = getCourseByLevel(level);
-      console.log('Found course:', course);
+      // Load lessons for the specific module
+      const moduleLessons = await fetchModuleLessons(moduleId);
+      console.log('Found lessons for module:', moduleId, moduleLessons);
+      setLessons(moduleLessons);
       
-      if (course) {
-        const courseModules = await fetchCourseModules(course.id);
-        console.log('Found modules:', courseModules);
-        setModules(courseModules);
-        
-        if (courseModules.length > 0) {
-          const moduleLessons = await fetchModuleLessons(courseModules[0].id);
-          setLessons(moduleLessons);
-          if (moduleLessons.length === 0) {
-            setError('Pamokos nerastos šiam moduliui');
-          }
-        } else {
-          setError('Moduliai nerasti šiam kursui');
-        }
+      if (moduleLessons.length === 0) {
+        setError('Pamokos nerastos šiam moduliui');
       } else {
-        setError('Kursas nerastas šiam lygiui');
+        // Also load the course and modules for display purposes
+        const course = getCourseByLevel(level);
+        if (course) {
+          const courseModules = await fetchCourseModules(course.id);
+          setModules(courseModules);
+        }
       }
     } catch (err) {
       console.error('Error loading course data:', err);
@@ -86,7 +83,7 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
             className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Grįžti į lygius</span>
+            <span>Grįžti į modulius</span>
           </button>
         </div>
         <div className="text-center">
@@ -111,7 +108,7 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
             className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Grįžti į lygius</span>
+            <span>Grįžti į modulius</span>
           </button>
         </div>
         <div className="text-center">
@@ -123,6 +120,7 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
   }
 
   const course = getCourseByLevel(level);
+  const currentModule = modules.find(m => m.id === moduleId);
   const lesson = lessons[currentLesson];
   const isCompleted = false; // TODO: Check if lesson is completed
 
@@ -134,13 +132,16 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
           className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Grįžti į lygius</span>
+          <span>Grįžti į modulius</span>
         </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
-          <h1 className="text-2xl font-bold mb-2">{course?.title}</h1>
+          <h1 className="text-2xl font-bold mb-2">{currentModule?.title || course?.title}</h1>
+          {currentModule?.description && (
+            <p className="text-blue-100 mb-2">{currentModule.description}</p>
+          )}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <BookOpen className="h-4 w-4" />
