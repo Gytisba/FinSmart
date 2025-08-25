@@ -15,47 +15,25 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // Get initial session
-    const initializeAuth = async () => {
-      try {
-        setLoading(true);
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Session error:', error);
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          setLoading(false);
-          return;
-        }
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        } else {
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        setSession(null);
-        setUser(null);
-        setProfile(null);
-        setLoading(false);
-      }
-    };
-    
-    initializeAuth();
-
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session?.user?.id);
+      
+      // Handle initial session
+      if (event === 'INITIAL_SESSION') {
+        setInitialized(true);
+      }
+      
+      // Only process if we've seen the initial session or this is a real auth change
+      if (!initialized && event !== 'INITIAL_SESSION') {
+        return;
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -68,7 +46,7 @@ export const useAuth = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [initialized]);
 
   const fetchProfile = async (userId: string) => {
     try {
