@@ -241,3 +241,5 @@ export const CourseOverview: React.FC<CourseOverviewProps> = ({
     </div>
   );
 };
+
+export { CourseOverview }
