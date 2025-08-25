@@ -22,14 +22,17 @@ export const LevelSelection: React.FC<LevelSelectionProps> = ({ onLevelSelect, u
     );
   }
 
-  if (courses.length === 0 && !loading) {
+  if (courses.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">Kursai nerasti duomenų bazėje.</p>
-          <p className="text-sm text-gray-500">
-            Patikrinkite, ar Supabase duomenų bazė yra teisingai sukonfigūruota ir ar yra duomenų courses lentelėje.
-          </p>
+          <p className="text-gray-600 mb-4">Kursai šiuo metu nepasiekiami.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="text-blue-600 hover:text-blue-800"
+          >
+            Bandyti dar kartą
+          </button>
         </div>
       </div>
     );
@@ -38,11 +41,11 @@ export const LevelSelection: React.FC<LevelSelectionProps> = ({ onLevelSelect, u
   const levels = [
     {
       id: 'beginner' as Level,
-      title: courses.find(c => c.level === 'beginner')?.title || 'Pradedančiųjų lygis',
-      subtitle: courses.find(c => c.level === 'beginner')?.summary || 'Asmeninių finansų pagrindai',
+      title: 'Pradedančiųjų lygis',
+      subtitle: 'Asmeninių finansų pagrindai',
       icon: BookOpen,
       color: 'from-emerald-500 to-green-600',
-      description: courses.find(c => c.level === 'beginner')?.summary || 'Išmokite finansų pagrindų: biudžeto sudarymo, taupymo ir pagrindinių finansinių įrankių naudojimo.',
+      description: 'Išmokite finansų pagrindų: biudžeto sudarymo, taupymo ir pagrindinių finansinių įrankių naudojimo.',
       modules: [
         'Kas yra pinigai ir kaip jie veikia?',
         'Biudžeto sudarymas - jūsų finansų pagrindas',
@@ -55,11 +58,11 @@ export const LevelSelection: React.FC<LevelSelectionProps> = ({ onLevelSelect, u
     },
     {
       id: 'intermediate' as Level,
-      title: courses.find(c => c.level === 'intermediate')?.title || 'Vidutinis lygis',
-      subtitle: courses.find(c => c.level === 'intermediate')?.summary || 'Turto kūrimas ir finansiniai įrankiai',
+      title: 'Vidutinis lygis',
+      subtitle: 'Turto kūrimas ir finansiniai įrankiai',
       icon: TrendingUp,
       color: 'from-blue-500 to-indigo-600',
-      description: courses.find(c => c.level === 'intermediate')?.summary || 'Sužinokite apie investavimą, pensijų kaupimą ir finansinių paslaugų naudojimą Lietuvoje.',
+      description: 'Sužinokite apie investavimą, pensijų kaupimą ir finansinių paslaugų naudojimą Lietuvoje.',
       modules: [
         'Lietuvos pensijų sistema',
         'Sudėtinės palūkanos',
@@ -72,11 +75,11 @@ export const LevelSelection: React.FC<LevelSelectionProps> = ({ onLevelSelect, u
     },
     {
       id: 'advanced' as Level,
-      title: courses.find(c => c.level === 'advanced')?.title || 'Pažengusiųjų lygis',
-      subtitle: courses.find(c => c.level === 'advanced')?.summary || 'Investavimas ir ekonomikos supratimas',
+      title: 'Pažengusiųjų lygis',
+      subtitle: 'Investavimas ir ekonomikos supratimas',
       icon: BarChart3,
       color: 'from-purple-500 to-pink-600',
-      description: courses.find(c => c.level === 'advanced')?.summary || 'Gilintis į akcijų rinkas, ETF fondus ir makroekonomikos principus.',
+      description: 'Gilintis į akcijų rinkas, ETF fondus ir makroekonomikos principus.',
       modules: [
         'Akcijų rinkos pagrindai',
         'ETF fondai',

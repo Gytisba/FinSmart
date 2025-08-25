@@ -73,42 +73,42 @@ export type Database = {
       courses: {
         Row: {
           id: string;
-          level: 'beginner' | 'intermediate' | 'advanced';
+          slug: string;
           title: string;
-          subtitle: string | null;
-          description: string | null;
-          color_from: string;
-          color_to: string;
-          icon: string;
-          total_modules: number;
+          level: 'beginner' | 'intermediate' | 'advanced';
+          summary: string | null;
+          cover_url: string | null;
+          status: 'draft' | 'published' | 'archived';
+          created_by: string;
           created_at: string;
           updated_at: string;
+          published_at: string | null;
         };
         Insert: {
           id?: string;
-          level: 'beginner' | 'intermediate' | 'advanced';
+          slug: string;
           title: string;
-          subtitle?: string | null;
-          description?: string | null;
-          color_from?: string;
-          color_to?: string;
-          icon?: string;
-          total_modules?: number;
+          level: 'beginner' | 'intermediate' | 'advanced';
+          summary?: string | null;
+          cover_url?: string | null;
+          status?: 'draft' | 'published' | 'archived';
+          created_by: string;
           created_at?: string;
           updated_at?: string;
+          published_at?: string | null;
         };
         Update: {
           id?: string;
-          level?: 'beginner' | 'intermediate' | 'advanced';
+          slug?: string;
           title?: string;
-          subtitle?: string | null;
-          description?: string | null;
-          color_from?: string;
-          color_to?: string;
-          icon?: string;
-          total_modules?: number;
+          level?: 'beginner' | 'intermediate' | 'advanced';
+          summary?: string | null;
+          cover_url?: string | null;
+          status?: 'draft' | 'published' | 'archived';
+          created_by?: string;
           created_at?: string;
           updated_at?: string;
+          published_at?: string | null;
         };
       };
       course_modules: {
