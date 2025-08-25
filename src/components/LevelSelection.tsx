@@ -22,11 +22,14 @@ export const LevelSelection: React.FC<LevelSelectionProps> = ({ onLevelSelect, u
     );
   }
 
-  if (courses.length === 0) {
+  if (courses.length === 0 && !loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center">
-          <p className="text-gray-600">Kursai nerassti. Bandykite atnaujinti puslapį.</p>
+          <p className="text-gray-600 mb-4">Kursai nerasti duomenų bazėje.</p>
+          <p className="text-sm text-gray-500">
+            Patikrinkite, ar Supabase duomenų bazė yra teisingai sukonfigūruota ir ar yra duomenų courses lentelėje.
+          </p>
         </div>
       </div>
     );
