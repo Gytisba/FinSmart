@@ -5,6 +5,7 @@ import { AuthModal } from './components/AuthModal';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { LevelSelection } from './components/LevelSelection';
+import { CourseOverview } from './components/CourseOverview';
 import { CourseModule } from './components/CourseModule';
 import { Quiz } from './components/Quiz';
 import { Calculator } from './components/Calculator';
@@ -17,6 +18,7 @@ import { supabase } from './lib/supabase';
 import { DatabaseDebug } from './components/DatabaseDebug';
 
 export type Section = 'home' | 'course' | 'quiz' | 'calculator' | 'glossary' | 'news' | 'resources' | 'profile';
+export type CourseView = 'overview' | 'module';
 export type Level = 'beginner' | 'intermediate' | 'advanced';
 
 export interface UserProgress {
@@ -35,6 +37,7 @@ function App() {
   const { user, loading: authLoading } = useAuth();
   const { progress, loading: progressLoading, resetProgress } = useUserProgress();
   const [currentSection, setCurrentSection] = useState<Section>('home');
+  const [courseView, setCourseView] = useState<CourseView>('overview');
   const [selectedLevel, setSelectedLevel] = useState<Level>('beginner');
   const [selectedModule, setSelectedModule] = useState<string>('');
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -50,11 +53,13 @@ function App() {
 
   const handleLevelSelect = (level: Level) => {
     setSelectedLevel(level);
+    setCourseView('overview');
     setCurrentSection('course');
   };
 
   const handleModuleSelect = (moduleId: string) => {
     setSelectedModule(moduleId);
+    setCourseView('module');
     setCurrentSection('course');
   };
 
@@ -142,14 +147,26 @@ function App() {
 
     switch (currentSection) {
       case 'course':
-        return (
-          <CourseModule
-            level={selectedLevel}
-            userProgress={appProgress}
-            onStartQuiz={() => setCurrentSection('quiz')}
-            onBack={() => setCurrentSection('home')}
-          />
-        );
+        if (courseView === 'overview') {
+          return (
+            <CourseOverview
+              level={selectedLevel}
+              userProgress={appProgress}
+              onModuleSelect={handleModuleSelect}
+              onBack={() => setCurrentSection('home')}
+            />
+          );
+        } else {
+          return (
+            <CourseModule
+              level={selectedLevel}
+              moduleId={selectedModule}
+              userProgress={appProgress}
+              onStartQuiz={() => setCurrentSection('quiz')}
+              onBack={() => setCourseView('overview')}
+            />
+          );
+        }
       case 'quiz':
         return (
           <Quiz
