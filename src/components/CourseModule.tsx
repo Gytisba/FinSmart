@@ -34,20 +34,21 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
     setError(null);
     
     try {
+      const course = getCourseByLevel(level);
       console.log('Found course:', course);
       
-    const course = getCourseByLevel(level);
-    if (course) {
+      if (course) {
+        const courseModules = await fetchCourseModules(course.id);
         console.log('Found modules:', courseModules);
-      const courseModules = await fetchCourseModules(course.id);
-      setModules(courseModules);
-      
-      if (courseModules.length > 0) {
+        setModules(courseModules);
+        
+        if (courseModules.length > 0) {
+          const moduleLessons = await fetchModuleLessons(courseModules[0].id);
           console.log('Found lessons:', moduleLessons);
-        const moduleLessons = await fetchModuleLessons(courseModules[0].id);
+          setLessons(moduleLessons);
         } else {
           setError('Moduliai nerasti šiam kursui');
-        setLessons(moduleLessons);
+        }
       } else {
         setError('Kursas nerastas šiam lygiui');
       }
@@ -55,8 +56,7 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
       console.error('Error loading course data:', err);
       setError('Klaida kraunant kurso duomenis');
     } finally {
-    }
-    setLoading(false);
+      setLoading(false);
     }
   };
 
