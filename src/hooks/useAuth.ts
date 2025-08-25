@@ -18,15 +18,39 @@ export const useAuth = () => {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          // If there's an error getting the session, clear any corrupted data
+          await supabase.auth.signOut();
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+          return;
+        }
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        // Handle any unexpected errors during session initialization
+        console.error('Error initializing auth:', error);
+        await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        setProfile(null);
         setLoading(false);
       }
-    });
+    };
+    
+    initializeAuth();
 
     // Listen for auth changes
     const {
