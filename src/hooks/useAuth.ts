@@ -71,17 +71,21 @@ export const useAuth = () => {
   }, []);
 
   const fetchProfile = async (userId: string) => {
+    const MAX_RETRIES = 3;
     let retryCount = 0;
-    
+
     const attemptFetch = async (): Promise<void> => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', userId)
+      try {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (error) {
+          if (error.code === 'PGRST116') {
             // Profile doesn't exist, retry with exponential backoff
-            if (retryCount < maxRetries) {
+            if (retryCount < MAX_RETRIES) {
               retryCount++;
               setTimeout(() => attemptFetch(), 1000 * retryCount);
               return;
@@ -93,21 +97,23 @@ export const useAuth = () => {
           } else {
             console.error('Error fetching profile:', error);
             setLoading(false);
-      if (error) {
-        if (error.code === 'PGRST116') {
-          setTimeout(() => fetchProfile(userId), 1000);
-          return;
-          setLoading(false);
+            return;
+          }
         }
-        console.error('Error fetching profile:', error);
+
         setProfile(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setLoading(false);
       }
     };
-    
-    await attemptFetch();
+
+    try {
+      setLoading(true);
+      await attemptFetch();
     } catch (error) {
       console.error('Error fetching profile:', error);
-    } finally {
       setLoading(false);
     }
   };

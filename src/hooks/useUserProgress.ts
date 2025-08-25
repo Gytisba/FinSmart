@@ -31,17 +31,21 @@ export const useUserProgress = () => {
   const fetchProgress = async () => {
     if (!user) return;
 
+    const MAX_RETRIES = 3;
     let retryCount = 0;
-    
+
     const attemptFetch = async (): Promise<void> => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('user_progress')
-        .select('*')
-        .eq('user_id', user.id)
+      try {
+        const { data, error } = await supabase
+          .from('user_progress')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          if (error.code === 'PGRST116') {
             // Progress doesn't exist, retry with exponential backoff
-            if (retryCount < maxRetries) {
+            if (retryCount < MAX_RETRIES) {
               retryCount++;
               setTimeout(() => attemptFetch(), 1000 * retryCount);
               return;
@@ -53,22 +57,23 @@ export const useUserProgress = () => {
           } else {
             console.error('Error fetching progress:', error);
             setLoading(false);
-      if (error) {
-        if (error.code === 'PGRST116') {
-          setTimeout(() => fetchProgress(), 1000);
-          return;
-          setLoading(false);
+            return;
+          }
         }
-        console.error('Error fetching progress:', error);
+
         setProgress(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching progress:', error);
+        setLoading(false);
       }
     };
-    
-    setLoading(true);
-    await attemptFetch();
+
+    try {
+      setLoading(true);
+      await attemptFetch();
     } catch (error) {
       console.error('Error fetching progress:', error);
-    } finally {
       setLoading(false);
     }
   };
