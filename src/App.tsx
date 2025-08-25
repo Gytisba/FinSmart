@@ -144,7 +144,6 @@ function App() {
         return (
           <CourseModule
             level={selectedLevel}
-            moduleId={selectedModule}
             userProgress={appProgress}
             onStartQuiz={() => setCurrentSection('quiz')}
             onBack={() => setCurrentSection('home')}

@@ -6,7 +6,6 @@ import { useUserProgress } from '../hooks/useUserProgress';
 
 interface CourseModuleProps {
   level: Level;
-  moduleId: string;
   userProgress: UserProgress;
   onStartQuiz: () => void;
   onBack: () => void;
@@ -24,6 +23,7 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
   const [modules, setModules] = useState<any[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   React.useEffect(() => {
     loadCourseData();
@@ -31,17 +31,33 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
 
   const loadCourseData = async () => {
     setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Found course:', course);
+      
     const course = getCourseByLevel(level);
     if (course) {
+        console.log('Found modules:', courseModules);
       const courseModules = await fetchCourseModules(course.id);
       setModules(courseModules);
       
       if (courseModules.length > 0) {
+          console.log('Found lessons:', moduleLessons);
         const moduleLessons = await fetchModuleLessons(courseModules[0].id);
+        } else {
+          setError('Moduliai nerasti šiam kursui');
         setLessons(moduleLessons);
+      } else {
+        setError('Kursas nerastas šiam lygiui');
       }
+    } catch (err) {
+      console.error('Error loading course data:', err);
+      setError('Klaida kraunant kurso duomenis');
+    } finally {
     }
     setLoading(false);
+    }
   };
 
   const handleLessonComplete = async (lessonId: string) => {
@@ -54,6 +70,31 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Kraunama pamoka...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <button
+            onClick={onBack}
+            className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Grįžti į lygius</span>
+          </button>
+        </div>
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button 
+            onClick={loadCourseData}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Bandyti dar kartą
+          </button>
         </div>
       </div>
     );
@@ -73,6 +114,7 @@ export const CourseModule: React.FC<CourseModuleProps> = ({
         </div>
         <div className="text-center">
           <p className="text-gray-600">Pamokos nerastos šiam lygiui.</p>
+          <p className="text-sm text-gray-500 mt-2">Moduliai: {modules.length}</p>
         </div>
       </div>
     );
