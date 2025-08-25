@@ -63,20 +63,24 @@ export const useCourses = () => {
   const fetchCourses = async () => {
     try {
       setLoading(true);
+      setError(null);
       const { data, error } = await supabase
         .from('courses')
         .select('*')
-        .order('level');
+        .eq('status', 'published')
+        .order('created_at');
 
       if (error) {
-        setError(error.message);
         console.error('Error fetching courses:', error);
+        setError(`Failed to load courses: ${error.message}`);
+        setCourses([]);
       } else {
         setCourses(data || []);
       }
     } catch (err) {
-      setError('Failed to fetch courses');
       console.error('Error fetching courses:', err);
+      setError('Failed to fetch courses');
+      setCourses([]);
     } finally {
       setLoading(false);
     }
