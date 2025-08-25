@@ -14,6 +14,7 @@ import { Resources } from './components/Resources';
 import { Profile } from './components/Profile';
 import { Footer } from './components/Footer';
 import { supabase } from './lib/supabase';
+import { DatabaseDebug } from './components/DatabaseDebug';
 
 export type Section = 'home' | 'course' | 'quiz' | 'calculator' | 'glossary' | 'news' | 'resources' | 'profile';
 export type Level = 'beginner' | 'intermediate' | 'advanced';
@@ -178,6 +179,9 @@ function App() {
         return (
           <>
             <Hero onAuthRequired={handleAuthRequired} />
+            <div className="max-w-4xl mx-auto px-4 py-8">
+              <DatabaseDebug />
+            </div>
             <LevelSelection
               onLevelSelect={handleLevelSelect}
               userProgress={appProgress}
