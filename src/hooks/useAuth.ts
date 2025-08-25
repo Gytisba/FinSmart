@@ -20,11 +20,11 @@ export const useAuth = () => {
     // Get initial session
     const initializeAuth = async () => {
       try {
+        setLoading(true);
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          // If there's an error getting the session, clear any corrupted data
-          await supabase.auth.signOut();
+          console.error('Session error:', error);
           setSession(null);
           setUser(null);
           setProfile(null);
@@ -34,15 +34,14 @@ export const useAuth = () => {
         
         setSession(session);
         setUser(session?.user ?? null);
+        
         if (session?.user) {
-          fetchProfile(session.user.id);
+          await fetchProfile(session.user.id);
         } else {
           setLoading(false);
         }
       } catch (error) {
-        // Handle any unexpected errors during session initialization
         console.error('Error initializing auth:', error);
-        await supabase.auth.signOut();
         setSession(null);
         setUser(null);
         setProfile(null);
@@ -56,6 +55,7 @@ export const useAuth = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -71,24 +71,40 @@ export const useAuth = () => {
   }, []);
 
   const fetchProfile = async (userId: string) => {
+    let retryCount = 0;
+    
+    const attemptFetch = async (): Promise<void> => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('id', userId)
-        .single();
-
+            // Profile doesn't exist, retry with exponential backoff
+            if (retryCount < maxRetries) {
+              retryCount++;
+              setTimeout(() => attemptFetch(), 1000 * retryCount);
+              return;
+            } else {
+              console.error('Profile not found after retries');
+              setLoading(false);
+              return;
+            }
+          } else {
+            console.error('Error fetching profile:', error);
+            setLoading(false);
       if (error) {
         if (error.code === 'PGRST116') {
-          // Profile doesn't exist, wait a moment and try again (for new users)
           setTimeout(() => fetchProfile(userId), 1000);
           return;
+          setLoading(false);
         }
         console.error('Error fetching profile:', error);
-      } else {
         setProfile(data);
       }
+    };
+    
+    await attemptFetch();
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {

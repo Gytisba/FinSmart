@@ -31,24 +31,41 @@ export const useUserProgress = () => {
   const fetchProgress = async () => {
     if (!user) return;
 
+    let retryCount = 0;
+    
+    const attemptFetch = async (): Promise<void> => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('user_progress')
         .select('*')
         .eq('user_id', user.id)
-        .single();
-
+            // Progress doesn't exist, retry with exponential backoff
+            if (retryCount < maxRetries) {
+              retryCount++;
+              setTimeout(() => attemptFetch(), 1000 * retryCount);
+              return;
+            } else {
+              console.error('Progress not found after retries');
+              setLoading(false);
+              return;
+            }
+          } else {
+            console.error('Error fetching progress:', error);
+            setLoading(false);
       if (error) {
         if (error.code === 'PGRST116') {
-          // Progress doesn't exist, wait a moment and try again (for new users)
           setTimeout(() => fetchProgress(), 1000);
           return;
+          setLoading(false);
         }
         console.error('Error fetching progress:', error);
-      } else {
         setProgress(data);
       }
+    };
+    
+    setLoading(true);
+    await attemptFetch();
     } catch (error) {
       console.error('Error fetching progress:', error);
     } finally {

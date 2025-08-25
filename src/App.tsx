@@ -91,6 +91,9 @@ function App() {
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Kraunama...</p>
+          <p className="text-gray-500 text-sm mt-2">
+            {authLoading ? 'Tikrinama autentifikacija...' : 'Kraunama pažanga...'}
+          </p>
         </div>
       </div>
     );
